@@ -62,6 +62,10 @@ class Example(QWidget):
         self.table.move(150, 200)
         self.table.setStyleSheet('border-style: solid; border-width: 3px; border-color: black;'
                                  'background-color: rgb(207, 162, 98);')
+        self.nalog = QLabel("До налога: 30 \n Налог: 0" , self)
+        self.nalog.move(800, 105)
+        self.nalog.setStyleSheet('border-style: solid; border-width: 3px; border-color: black;'
+                                 'background-color: rgb(207, 162, 98);')
         self.shop = QWidget(self)
         self.shop.move(10000, 10000)
         self.shop.resize(400, 353)
@@ -529,6 +533,7 @@ class Example(QWidget):
     def tick(self):
         self.days += 1
         self.date.setText('Дни:\n   ' + str(self.days))
+        self.date.adjustSize()
         if self.timeDev:
             if self.timeToEnd > 1:
                 self.timeToEnd -= 1
@@ -545,6 +550,16 @@ class Example(QWidget):
                 self.table.adjustSize()
                 self.timeSale = False
                 self.timeToEnd = 5
+        if self.days % 30 == 0:
+            print(2)
+            self.nalog.setText('Плоти Налог!!')
+            self.nalog.adjustSize()
+            self.cash -= int((self.totalPapers / (self.days / 30) + self.fans / (self.days / 30))) + self.levelOfKnowledge * self.days * 2
+            self.money.setText('Деньги: \n   ' + str(self.cash))
+            self.money.adjustSize()
+        else:
+            self.nalog.setText("До налога:" + str(30 - self.days % 30) + "\n Налог: " + str(int((self.totalPapers / (self.days / 30) + self.fans / (self.days / 30))) + self.levelOfKnowledge * self.days * 2))
+            self.nalog.adjustSize()
 
     def showDevPage2(self):
         self.cashToDev = 0
@@ -705,16 +720,12 @@ class Example(QWidget):
         self.subs.setText('Фанаты: \n  ' + str(self.fans))
         self.money.setText('Деньги: \n   ' + str(self.cash))
         self.money.adjustSize()
+        self.subs.adjustSize()
         self.table.setText('Заработано сегодня: \n' + str(a) + '\nЗаработано за все дни: \n' + str(self.totalPapers))
         self.table.adjustSize()
 
 
-
-
-
-
 if __name__ == '__main__':
-
     app = QApplication(sys.argv)
     ex = Example()
     ex.show()
