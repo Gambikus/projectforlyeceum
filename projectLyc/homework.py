@@ -400,6 +400,7 @@ class Example(QWidget):
         self.timeDev = False
         self.timeSale = False
         self.fans = 0
+        # ////
 
         self.startPage = QWidget(self)
         self.startPage.move(0, 0)
