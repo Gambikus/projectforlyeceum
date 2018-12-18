@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PyQt5.QtWidgets import QButtonGroup, QGroupBox, QSlider
+from PyQt5.QtWidgets import QButtonGroup, QGroupBox, QMessageBox
 from PyQt5.QtWidgets import QLabel, QApplication, QLineEdit, QRadioButton
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QCheckBox
@@ -23,7 +23,6 @@ class Example(QWidget):
     def initUI(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.tick)
-        self.timer.start(1000)
         self.days = 0
         self.totalPapers = 0
 
@@ -36,6 +35,7 @@ class Example(QWidget):
         self.setMouseTracking(True)
         self.setWindowTitle('Game maker')
         self.setGeometry(10, 10, 1024, 768)
+        self.setFixedSize(1024, 768)
         palette = QPalette()
         img = QImage('mainWindow.png')
         scaled = img.scaled(self.size(), Qt.KeepAspectRatioByExpanding, transformMode=Qt.SmoothTransformation)
@@ -401,10 +401,32 @@ class Example(QWidget):
         self.timeSale = False
         self.fans = 0
 
+        self.startPage = QWidget(self)
+        self.startPage.move(0, 0)
+        self.startPage.setFont(QtGui.QFont("Bahnschrift Light SemiCondensed", 30))
+        self.startPage.resize(1024, 768)
+        self.startPage.setStyleSheet('border-style: solid; border-width: 3px; border-color: black;'
+                                     'background-color: rgb(207, 162, 98);')
+        self.startText = QLabel('Здравствуй, начинающий разработчик! Начиная игру, сначала \n тебе потребуются'
+                                'купить набор "Знания I" в магазине, затем \nты можешь начать разработку своей '
+                                'первой игры в разделе\n "Разработка". на первом этапе ты можешь выбрать тему и '
+                                'жанр\n игры, а также платформу и тип,\которые открываются с каждым\n набором знаний. '
+                                'На втором этапе тебе будет доступен выбор \nтехнологий, который с каждым набором '
+                                'знаний\n будет увеличиваться. Так же каждые 30 дней тебе придется \nплатить налог, '
+                                'так что будь осторожен!. Удачи!! ', self.startPage)
+        self.startText.setStyleSheet('border-style: solid; border-width: 0px; border-color: black;'
+                                     'background-color: rgb(207, 162, 98);')
+        self.startText.move(10, 10)
+        self.startButton = QPushButton('Начать', self.startPage)
+        self.startButton.move(700, 600)
+        self.startButton.adjustSize()
+        self.startButton.clicked.connect(self.start)
 
+    def start(self):  # начало игры
+        self.startPage.move(10000, 10000)
+        self.timer.start(1550)
 
-
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event):  # обработка передвижения мыши
         if 500 <= event.x() <= 645 and 7 <= event.y() <= 95:
             self.shopButton.setPixmap(QPixmap('shopButton2.png'))
         elif 700 <= event.x() <= 845 and 7 <= event.y() <= 95:
@@ -461,7 +483,7 @@ class Example(QWidget):
             self.shopItem3.setPixmap(QPixmap('shopItem3.png'))
             self.shopItem4.setPixmap(QPixmap('shopItem4.png'))
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event):  # обработка нажатия кнопок мыши
         if event.button() == Qt.LeftButton:
             if 500 <= event.x() <= 645 and 7 <= event.y() <= 95:
                 self.showShop()
@@ -499,13 +521,11 @@ class Example(QWidget):
                     self.cash -= 200000
                     self.money.setText('Деньги: \n   ' + str(self.cash))
 
-
-
-    def showShop(self):
+    def showShop(self):  # активация окошка магазина
         self.shopOn = True
         self.shop.move(300, 200)
 
-    def showDev(self):
+    def showDev(self):  # активация окошка первого этапа разработки игры
         self.devPage1On = True
         self.timer.stop()
         self.platform1.setEnabled(False)
@@ -530,7 +550,16 @@ class Example(QWidget):
             self.type4.setEnabled(True)
         self.devPage1.move(200, 100)
 
-    def tick(self):
+    def tick(self):  # описание действия таймера
+        if self.cash < 0:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+
+            msg.setText("Вы проиграли!:(")
+            msg.setWindowTitle("Проигрыш")
+            retval = msg.exec_()
+            if retval == QMessageBox.Ok:
+                sys.exit(app.exec_())
         self.days += 1
         self.date.setText('Дни:\n   ' + str(self.days))
         self.date.adjustSize()
@@ -561,7 +590,8 @@ class Example(QWidget):
             self.nalog.setText("До налога:" + str(30 - self.days % 30) + "\n Налог: " + str(int((self.totalPapers / (self.days / 30) + self.fans / (self.days / 30))) + self.levelOfKnowledge * self.days * 2))
             self.nalog.adjustSize()
 
-    def showDevPage2(self):
+
+    def showDevPage2(self):  # показывается окошко второго этапа разработки
         self.cashToDev = 0
         if self.levelOfKnowledge > 0:
             if self.theme1.isChecked():
@@ -686,14 +716,14 @@ class Example(QWidget):
             self.money.setText("Деньги: \n" + str(self.cash))
             self.startDev()
 
-    def relise(self):
+    def relise(self):  # метод для релиза игры
         self.table.setText('Релиз! \n  \nЗаработано за все дни: \n' + str(self.totalPapers))
         self.table.adjustSize()
         self.timeDev = False
         self.timeToEnd = 5
         self.timeSale = True
 
-    def startDev(self):
+    def startDev(self):  # метод для описания процесса разработки
         self.timeDev = True
         self.tick()
         self.timer.start()
@@ -702,7 +732,7 @@ class Example(QWidget):
         self.table.setText('Дней до релиза: \n' + str(self.timeToEnd))
         self.table.adjustSize()
 
-    def sale(self):
+    def sale(self):  # метод для процесса продажи игры
         myltiply1 = 10 + self.platform + self.type
         if self.style in self.perfect[str(self.theme)][0]:
             myltiply2 = 2
